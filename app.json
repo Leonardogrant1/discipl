@@ -1,15 +1,16 @@
 {
   "expo": {
-    "name": "descipl",
-    "slug": "descipl",
+    "name": "Discipl",
+    "slug": "discipl",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "descipl",
+    "scheme": "discipl",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "studio.northbyte.discipl"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +20,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "studio.northbyte.discipl"
     },
     "web": {
       "output": "static",

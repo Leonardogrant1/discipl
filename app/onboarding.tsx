@@ -1,0 +1,104 @@
+import { router } from 'expo-router';
+
+import { OnboardingProgressWrapper } from '@/components/onboarding/onboarding-progress-wrapper';
+import { ActivityStep } from '@/components/onboarding/steps/activity-step';
+import { AffirmationsFamiliarityStep } from '@/components/onboarding/steps/affirmations-familiarity-step';
+import { AgeStep } from '@/components/onboarding/steps/age-step';
+import { CommitmentStep } from '@/components/onboarding/steps/commitment-step';
+import { GenderStep } from '@/components/onboarding/steps/gender-step';
+import { HabitStep } from '@/components/onboarding/steps/habit-step';
+import { ImprovementStep } from '@/components/onboarding/steps/improvement-step';
+import { NameStep } from '@/components/onboarding/steps/name-step';
+import { NotificationScheduleStep } from '@/components/onboarding/steps/notification-schedule-step';
+import { NotificationsStep } from '@/components/onboarding/steps/notifications-step';
+import { ReferralStep } from '@/components/onboarding/steps/referral-step';
+import { TrialOfferStep } from '@/components/onboarding/steps/trial-offer-step';
+import { TrialReminderStep } from '@/components/onboarding/steps/trial-reminder-step';
+import { WelcomeStep } from '@/components/onboarding/steps/welcome-step';
+import { WhatYouWillGetStep } from '@/components/onboarding/steps/what-you-will-get-step';
+import { OnboardingStep } from '@/components/onboarding/types';
+import { useUserDataStore } from '@/stores/UserDataStore';
+
+const ONBOARDING_STEPS: OnboardingStep[] = [
+  {
+    component: WelcomeStep,
+    showProgressIndicator: false,
+    continueButtonText: "Let's go",
+  },
+  {
+    component: NameStep,
+    continueButtonText: 'Continue',
+    initialCanContinue: false,
+  },
+  {
+    component: GenderStep,
+    initialCanContinue: false,
+  },
+  {
+    component: ReferralStep,
+    initialCanContinue: false,
+  },
+  {
+    component: AgeStep,
+    initialCanContinue: false,
+  },
+  {
+    component: ActivityStep,
+    initialCanContinue: false,
+  },
+  {
+    component: AffirmationsFamiliarityStep,
+    initialCanContinue: false,
+  },
+  {
+    component: ImprovementStep,
+    continueButtonText: 'Continue',
+    initialCanContinue: false,
+  },
+  {
+    component: HabitStep,
+    continueButtonText: 'Build my habit',
+  },
+  {
+    component: NotificationScheduleStep,
+    continueButtonText: 'Continue',
+  },
+  {
+    component: NotificationsStep,
+    continueButtonText: 'Enable notifications',
+    showContinueButton: false,
+    showProgressIndicator: false
+  },
+  {
+    component: CommitmentStep,
+    showContinueButton: false,
+  },
+  {
+    component: TrialOfferStep,
+    continueButtonText: 'Continue',
+  },
+  {
+    component: TrialReminderStep,
+    continueButtonText: 'Continue',
+  },
+  {
+    component: WhatYouWillGetStep,
+    continueButtonText: "Let's get started!",
+  },
+];
+
+export default function OnboardingScreen() {
+  const completeOnboarding = useUserDataStore((s) => s.completeOnboarding);
+
+  function handleComplete() {
+    completeOnboarding();
+    router.replace('/home');
+  }
+
+  return (
+    <OnboardingProgressWrapper
+      steps={ONBOARDING_STEPS}
+      onComplete={handleComplete}
+    />
+  );
+}
