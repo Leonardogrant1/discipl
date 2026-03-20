@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { useUserDataStore } from '@/stores/UserDataStore';
-import { Gender } from '@/types';
+import { Gender } from '@/types/user-data';
 
 import { useOnboardingControl } from '../onboarding-control-context';
 import { SurveyQuestion } from '../survey-question';

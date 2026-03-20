@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { OnboardingControlContext } from './onboarding-control-context';
 import { OnboardingStep } from './types';
@@ -15,6 +15,9 @@ export function OnboardingProgressWrapper({ steps, onComplete }: Props) {
     const [isLoading, setIsLoading] = useState(false);
     const inFlightRef = useRef(false);
 
+    const opacity = useRef(new Animated.Value(1)).current;
+    const translateX = useRef(new Animated.Value(0)).current;
+
     const step = steps[currentIndex];
     const StepComponent = step.component;
 
@@ -22,6 +25,23 @@ export function OnboardingProgressWrapper({ steps, onComplete }: Props) {
     const showContinue = step.showContinueButton ?? true;
     const continueText = step.continueButtonText ?? 'Continue';
     const isLight = step.theme === 'light';
+
+    function animateIn() {
+        opacity.setValue(0);
+        translateX.setValue(20);
+        Animated.parallel([
+            Animated.timing(opacity, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+            Animated.timing(translateX, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    }
 
     function advance() {
         if (currentIndex < steps.length - 1) {
@@ -49,6 +69,10 @@ export function OnboardingProgressWrapper({ steps, onComplete }: Props) {
         }
     }
 
+    useEffect(() => {
+        animateIn();
+    }, [currentIndex]);
+
     return (
         <OnboardingControlContext.Provider value={{ currentIndex, canContinue, setCanContinue, nextStep }}>
             <View style={[styles.container, isLight && styles.containerLight]}>
@@ -66,9 +90,9 @@ export function OnboardingProgressWrapper({ steps, onComplete }: Props) {
                     </View>
                 )}
 
-                <View style={styles.stepContainer}>
+                <Animated.View style={[styles.stepContainer, { opacity, transform: [{ translateX }] }]}>
                     <StepComponent />
-                </View>
+                </Animated.View>
 
                 {showContinue && (
                     <View style={styles.footer}>

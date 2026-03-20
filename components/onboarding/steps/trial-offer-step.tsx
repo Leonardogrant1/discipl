@@ -1,10 +1,35 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, View } from 'react-native';
+
+function useFadeSlide(delay: number) {
+    const opacity = useRef(new Animated.Value(0)).current;
+    const translateY = useRef(new Animated.Value(16)).current;
+
+    useEffect(() => {
+        const t = setTimeout(() => {
+            Animated.parallel([
+                Animated.timing(opacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+                Animated.spring(translateY, { toValue: 0, useNativeDriver: true, speed: 18, bounciness: 5 }),
+            ]).start();
+        }, delay);
+        return () => clearTimeout(t);
+    }, []);
+
+    return { opacity, transform: [{ translateY }] };
+}
 
 export function TrialOfferStep() {
+    const titleAnim = useFadeSlide(200);
+    const subtitleAnim = useFadeSlide(450);
+
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>We offer 3 days of premium access, just for you</Text>
-            <Text style={styles.subtitle}>To help you feel more self-confident</Text>
+            <Animated.Text style={[styles.title, titleAnim]}>
+                We offer 3 days of premium access, just for you
+            </Animated.Text>
+            <Animated.Text style={[styles.subtitle, subtitleAnim]}>
+                To let you feel the impact of Descipl
+            </Animated.Text>
         </View>
     );
 }

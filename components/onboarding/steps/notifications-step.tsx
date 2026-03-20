@@ -1,97 +1,40 @@
-import { ThemedText } from '@/components/themed-text'
-import { posthog } from '@/services/posthog'
-import * as Notifications from 'expo-notifications'
-import React, { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Animated, StyleSheet, TouchableOpacity, View } from 'react-native'
-import { useOnboardingControl } from '../onboarding-control-context'
-
-
+import { useEffect, useRef } from 'react'
+import { Animated, StyleSheet, Text, View } from 'react-native'
 
 export function NotificationsStep() {
-    const [isLoading, setIsLoading] = useState(false)
-    const { nextStep } = useOnboardingControl();
-    const fingerAnim = useRef(new Animated.Value(0)).current
+    const titleOpacity = useRef(new Animated.Value(0)).current
+    const titleY = useRef(new Animated.Value(16)).current
+    const warningOpacity = useRef(new Animated.Value(0)).current
+    const warningY = useRef(new Animated.Value(16)).current
 
     useEffect(() => {
-        Animated.loop(
-            Animated.sequence([
-                Animated.timing(fingerAnim, {
-                    toValue: -10,
-                    duration: 600,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(fingerAnim, {
-                    toValue: 0,
-                    duration: 600,
-                    useNativeDriver: true,
-                }),
-            ])
-        ).start()
-    }, [])
+        Animated.parallel([
+            Animated.timing(titleOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+            Animated.spring(titleY, { toValue: 0, useNativeDriver: true, speed: 18, bounciness: 5 }),
+        ]).start()
 
-    const handleAllow = async () => {
-        setIsLoading(true)
-        try {
-            const { status } = await Notifications.requestPermissionsAsync()
-            if (status === 'granted') {
-                posthog.capture('notification_permission_granted')
-            } else {
-                posthog.capture('notification_permission_denied')
-            }
-        } finally {
-            nextStep()
-        }
-    }
+        setTimeout(() => {
+            Animated.parallel([
+                Animated.timing(warningOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+                Animated.spring(warningY, { toValue: 0, useNativeDriver: true, speed: 18, bounciness: 5 }),
+            ]).start()
+        }, 300)
+    }, [])
 
     return (
         <View style={styles.container}>
-            {/* Title */}
-            <ThemedText style={styles.title}>
-                Reach your goals with notifications
-            </ThemedText>
+            <Animated.View style={{ opacity: titleOpacity, transform: [{ translateY: titleY }] }}>
+                <Text style={styles.title}>Stay on track.{'\n'}Every single day.</Text>
+                <Text style={styles.subtitle}>
+                    To receive your daily affirmations, enable notifications.
+                </Text>
+            </Animated.View>
 
-            <View style={styles.spacer} />
-
-            {/* Dialog Box */}
-            <View style={styles.dialog}>
-                <View style={styles.messageArea}>
-                    <ThemedText style={styles.message}>
-                        Turn on Notification to receive your daily affirmations
-                    </ThemedText>
-                </View>
-
-                <View style={styles.buttonRow}>
-                    {/* Don't Allow */}
-                    <TouchableOpacity
-                        style={[styles.button, styles.dontAllowButton]}
-                        onPress={undefined}
-                        activeOpacity={0.8}
-                    >
-                        <ThemedText style={styles.dontAllowText}>Don't Allow</ThemedText>
-                    </TouchableOpacity>
-
-                    {/* Allow */}
-                    <TouchableOpacity
-                        style={[styles.button, styles.allowButton]}
-                        onPress={isLoading ? undefined : handleAllow}
-                        activeOpacity={0.8}
-                    >
-                        {isLoading ? (
-                            <ActivityIndicator size="small" color="#fff" />
-                        ) : (
-                            <ThemedText style={styles.allowText}>Allow</ThemedText>
-                        )}
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-            {/* Finger emoji */}
-            <Animated.View style={{
-                transform: [{ translateY: fingerAnim }], alignSelf: 'flex-end',
-                marginRight: 100,
-                marginTop: 16,
-            }}>
-                <ThemedText style={styles.finger}>👆</ThemedText>
+            <Animated.View style={[styles.warning, { opacity: warningOpacity, transform: [{ translateY: warningY }] }]}>
+                <Text style={styles.warningIcon}>⚠️</Text>
+                <Text style={styles.warningText}>
+                    Without notifications you'll miss one of the core features of this app.
+                </Text>
             </Animated.View>
         </View>
     )
@@ -100,69 +43,40 @@ export function NotificationsStep() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        paddingHorizontal: 28,
         justifyContent: 'center',
-        alignItems: 'flex-start',
+        gap: 24,
     },
     title: {
         color: 'white',
-        fontSize: 28,
+        fontSize: 32,
         fontWeight: '700',
-        textAlign: 'center',
-        marginBottom: 10,
+        lineHeight: 42,
+        marginBottom: 12,
     },
-    spacer: {
-        height: 40,
-    },
-    dialog: {
-        width: 280,
-        alignSelf: 'center',
-        backgroundColor: '#fff',
-        borderRadius: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.1,
-        shadowRadius: 20,
-        elevation: 10,
-        overflow: 'hidden',
-    },
-    messageArea: {
-        padding: 20,
-    },
-    message: {
+    subtitle: {
+        color: 'rgba(255,255,255,0.6)',
         fontSize: 16,
-        fontWeight: '500',
-        textAlign: 'center',
-        color: '#000',
+        lineHeight: 24,
     },
-    buttonRow: {
+    warning: {
         flexDirection: 'row',
-        height: 50,
+        alignItems: 'flex-start',
+        gap: 10,
+        backgroundColor: 'rgba(255,255,255,0.06)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderRadius: 12,
+        padding: 16,
     },
-    button: {
+    warningIcon: {
+        fontSize: 16,
+        marginTop: 1,
+    },
+    warningText: {
+        color: 'rgba(255,255,255,0.5)',
+        fontSize: 14,
+        lineHeight: 20,
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    dontAllowButton: {
-        backgroundColor: '#e5e5e5',
-        borderBottomLeftRadius: 16,
-    },
-    allowButton: {
-        backgroundColor: '#000',
-        borderBottomRightRadius: 16,
-    },
-    dontAllowText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#666',
-    },
-    allowText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#fff',
-    },
-    finger: {
-        fontSize: 24,
-
     },
 })

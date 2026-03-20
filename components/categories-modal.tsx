@@ -2,6 +2,14 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { ALL_CATEGORIES, Category, quotesByCategory } from '@/data/quotes';
+
+const CATEGORY_LABELS: Record<Category, string> = {
+  discipline: 'Discipline',
+  'winner-mindset': 'Winner Mindset',
+  'mental-strength': 'Mental Strength',
+  confidence: 'Confidence',
+  resilience: 'Resilience',
+};
 import { useUserDataStore } from '@/stores/UserDataStore';
 
 type Props = {
@@ -16,7 +24,7 @@ function CategoryCard({ category, selected }: { category: Category; selected: bo
       {selected && (
         <MaterialIcons name="check-circle-outline" size={20} color="white" style={styles.cardCheck} />
       )}
-      <Text style={styles.cardName}>{category.charAt(0).toUpperCase() + category.slice(1)}</Text>
+      <Text style={styles.cardName}>{CATEGORY_LABELS[category]}</Text>
       <Text style={styles.cardCount}>{count} Quotes</Text>
     </View>
   );

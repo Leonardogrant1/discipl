@@ -1,9 +1,12 @@
+import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 
 import { OnboardingProgressWrapper } from '@/components/onboarding/onboarding-progress-wrapper';
 import { ActivityStep } from '@/components/onboarding/steps/activity-step';
+import { AddWidgetStep } from '@/components/onboarding/steps/add-widget-step';
 import { AffirmationsFamiliarityStep } from '@/components/onboarding/steps/affirmations-familiarity-step';
 import { AgeStep } from '@/components/onboarding/steps/age-step';
+import { ChampionsStep } from '@/components/onboarding/steps/champions-step';
 import { CommitmentStep } from '@/components/onboarding/steps/commitment-step';
 import { GenderStep } from '@/components/onboarding/steps/gender-step';
 import { HabitStep } from '@/components/onboarding/steps/habit-step';
@@ -12,6 +15,7 @@ import { NameStep } from '@/components/onboarding/steps/name-step';
 import { NotificationScheduleStep } from '@/components/onboarding/steps/notification-schedule-step';
 import { NotificationsStep } from '@/components/onboarding/steps/notifications-step';
 import { ReferralStep } from '@/components/onboarding/steps/referral-step';
+import { SportCategoryStep } from '@/components/onboarding/steps/sport-category-step';
 import { TrialOfferStep } from '@/components/onboarding/steps/trial-offer-step';
 import { TrialReminderStep } from '@/components/onboarding/steps/trial-reminder-step';
 import { WelcomeStep } from '@/components/onboarding/steps/welcome-step';
@@ -23,7 +27,10 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     component: WelcomeStep,
     showProgressIndicator: false,
-    continueButtonText: "Let's go",
+  },
+  {
+    component: ChampionsStep,
+    showProgressIndicator: false,
   },
   {
     component: NameStep,
@@ -40,6 +47,10 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     component: AgeStep,
+    initialCanContinue: false,
+  },
+  {
+    component: SportCategoryStep,
     initialCanContinue: false,
   },
   {
@@ -65,9 +76,15 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   },
   {
     component: NotificationsStep,
-    continueButtonText: 'Enable notifications',
-    showContinueButton: false,
-    showProgressIndicator: false
+    continueButtonText: 'Enable Notifications',
+    preContinue: async () => {
+      await Notifications.requestPermissionsAsync();
+    },
+  },
+  {
+    component: AddWidgetStep,
+    continueButtonText: 'I will!',
+    initialCanContinue: false,
   },
   {
     component: CommitmentStep,

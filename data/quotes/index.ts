@@ -1,16 +1,26 @@
+import confidence from './confidence.json'
 import discipline from './discipline.json'
-import mindset from './mindset.json'
-import strength from './strength.json'
+import mentalStrength from './mental-strength.json'
+import resilience from './resilience.json'
+import winnerMindset from './winner-mindset.json'
 
 export const quotesByCategory = {
     discipline,
-    mindset,
-    strength,
+    'winner-mindset': winnerMindset,
+    'mental-strength': mentalStrength,
+    confidence,
+    resilience,
 } as const
 
 export type Category = keyof typeof quotesByCategory
 
-export const ALL_CATEGORIES: Category[] = ['discipline', 'mindset', 'strength']
+export const ALL_CATEGORIES: Category[] = [
+    'discipline',
+    'winner-mindset',
+    'mental-strength',
+    'confidence',
+    'resilience',
+]
 
 export type Quote = {
     id: string

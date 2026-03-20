@@ -1,4 +1,4 @@
-import { UserDataSettings } from "@/types";
+import { UserDataSettings } from "@/types/user-data";
 import { createMMKV } from "react-native-mmkv";
 import { create } from "zustand";
 import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
@@ -13,7 +13,8 @@ const defaultUserSettings: UserDataSettings = {
     notificationStartHour: 10,
     notificationEndHour: 20,
     randomizeNotificationTimes: true,
-    selectedCategories: ["discipline", "mindset", "strength"]
+    selectedCategories: ["discipline", "mindset", "strength"],
+    selectedSport: null,
 }
 
 const defaultStreakData: StreakData = {

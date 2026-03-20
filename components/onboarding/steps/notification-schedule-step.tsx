@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { useUserDataStore } from '@/stores/UserDataStore';
+import LottieView from 'lottie-react-native';
 
 const MIN = 1;
 const MAX = 10;
@@ -86,6 +87,13 @@ export function NotificationScheduleStep() {
                 </Text>
             </View>
 
+            <LottieView
+                source={require('@/assets/animations/notifications.json')}
+                autoPlay
+                loop={false}
+                style={{ width: "100%", height: 200 }}
+            />
+
             <View style={styles.card}>
                 {/* How many */}
                 <View style={styles.row}>
@@ -151,7 +159,6 @@ const styles = StyleSheet.create({
     },
     header: {
         alignItems: 'center',
-        marginBottom: 36,
     },
     title: {
         color: 'white',
