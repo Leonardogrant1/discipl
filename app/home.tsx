@@ -3,10 +3,14 @@ import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, FlatList, Share, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View, ViewToken } from 'react-native';
 
+import HeartIcon from '@/assets/icons/heart.svg';
+import ShareIcon from '@/assets/icons/share.svg';
+import UserIcon from '@/assets/icons/user.svg';
 import { CategoriesModal } from '@/components/categories-modal';
 import { SettingsModal } from '@/components/settings-modal';
 import { Fonts } from '@/constants/theme';
 import { buildFeed, Category, FeedQuote } from '@/data/quotes';
+import { checkAndReschedule, scheduleNotifications } from '@/services/notifications';
 import { posthog } from '@/services/posthog';
 import { useUserDataStore } from '@/stores/UserDataStore';
 
@@ -21,10 +25,27 @@ export default function HomeScreen() {
     const likedQuoteIds = useUserDataStore((s) => s.likedQuoteIds);
     const toggleLikedQuote = useUserDataStore((s) => s.toggleLikedQuote);
     const checkAndUpdateStreak = useUserDataStore((s) => s.checkAndUpdateStreak);
+    const settings = useUserDataStore((s) => s.settings);
 
     useEffect(() => {
         checkAndUpdateStreak();
+        checkAndReschedule(settings);
     }, []);
+
+    const isFirstRender = useRef(true);
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+        scheduleNotifications(settings);
+    }, [
+        settings.notificationsEnabled,
+        settings.notificationsPerDay,
+        settings.notificationStartHour,
+        settings.notificationEndHour,
+        settings.selectedCategories.join(','),
+    ]);
 
     const feed = useMemo(() => buildFeed(selectedCategories), [selectedCategories]);
 
@@ -100,32 +121,32 @@ export default function HomeScreen() {
             <View style={styles.fixedOverlay} pointerEvents="box-none">
                 {/* Top bar */}
                 <View style={styles.topBar} pointerEvents="box-none">
-                    <TouchableOpacity style={styles.iconButton}>
-                        <MaterialIcons name="person-outline" size={22} color="white" />
-                    </TouchableOpacity>
+                    <View style={{ width: 22 }} />
                     <Animated.View style={[styles.heartsRow, { opacity: heartsOpacity, transform: [{ scale: heartsScale }] }]}>
-                        <MaterialIcons name="favorite-border" size={15} color="white" />
+                        <HeartIcon width={15} height={15} color="white" />
                         <Text style={styles.heartsText}>{likeCount}/5</Text>
                         <View style={styles.progressTrack}>
                             <View style={[styles.progressFill, { width: `${likeProgress * 100}%` }]} />
                         </View>
                     </Animated.View>
                     <TouchableOpacity style={styles.iconButton} onPress={() => setSettingsVisible(true)}>
-                        <MaterialIcons name="person" size={22} color="white" />
+                        <UserIcon width={22} height={22} color="white" />
                     </TouchableOpacity>
                 </View>
 
                 {/* Action icons */}
                 <View style={styles.actionsRow} pointerEvents="box-none">
                     <TouchableOpacity style={styles.actionButton} onPress={() => currentQuote && shareQuote(currentQuote)}>
-                        <MaterialIcons name="share" size={26} color="white" />
+                        <View style={[styles.iconButton, {
+                            backgroundColor: 'rgba(20,20,20,0.85)',
+                        }]}>
+                            <ShareIcon width={26} height={26} color="white" />
+                        </View>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.actionButton} onPress={() => currentQuote && toggleLikedQuote(currentQuote.id)}>
-                        <MaterialIcons
-                            name={currentQuote && likedQuoteIds.includes(currentQuote.id) ? 'favorite' : 'favorite-border'}
-                            size={26}
-                            color={currentQuote && likedQuoteIds.includes(currentQuote.id) ? '#e53935' : 'white'}
-                        />
+                        <View style={[styles.iconButton, { backgroundColor: currentQuote && likedQuoteIds.includes(currentQuote.id) ? '#f92f2c57' : 'rgba(20,20,20,0.85)' }]}>
+                            <HeartIcon width={26} height={26} color="white" />
+                        </View>
                     </TouchableOpacity>
                 </View>
 
@@ -200,10 +221,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     iconButton: {
-        width: 42,
-        height: 42,
-        borderRadius: 21,
-        backgroundColor: 'rgba(0,0,0,0.45)',
+        padding: 15,
+        borderRadius: 100,
         alignItems: 'center',
         justifyContent: 'center',
     },
