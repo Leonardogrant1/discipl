@@ -1,7 +1,7 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, FlatList, Share, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View, ViewToken } from 'react-native';
-import { router } from 'expo-router';
 
 import { CategoriesModal } from '@/components/categories-modal';
 import { SettingsModal } from '@/components/settings-modal';
@@ -146,7 +146,7 @@ export default function HomeScreen() {
                     style={styles.debugButton}
                     onPress={() => {
                         useUserDataStore.setState({ hasCompletedOnboarding: false });
-                        router.replace('/onboarding');
+                        router.replace('/start');
                     }}
                 >
                     <Text style={styles.debugButtonText}>⚙ Onboarding</Text>

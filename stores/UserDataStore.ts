@@ -13,7 +13,7 @@ const defaultUserSettings: UserDataSettings = {
     notificationStartHour: 10,
     notificationEndHour: 20,
     randomizeNotificationTimes: true,
-    selectedCategories: ["discipline", "mindset", "strength"],
+    selectedCategories: ["discipline", "mindset", "strength"] as string[],
     selectedSport: null,
 }
 

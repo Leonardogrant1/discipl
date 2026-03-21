@@ -5,8 +5,8 @@ import { ALL_CATEGORIES, Category, quotesByCategory } from '@/data/quotes';
 
 const CATEGORY_LABELS: Record<Category, string> = {
   discipline: 'Discipline',
-  'winner-mindset': 'Winner Mindset',
-  'mental-strength': 'Mental Strength',
+  mindset: 'Winner Mindset',
+  strength: 'Mental Strength',
   confidence: 'Confidence',
   resilience: 'Resilience',
 };

@@ -1,4 +1,5 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useEffect } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { ALL_CATEGORIES, Category } from '@/data/quotes';
@@ -8,8 +9,8 @@ import { useOnboardingControl } from '../onboarding-control-context';
 
 const CATEGORY_META: Record<Category, { title: string; subtext: string }> = {
     discipline: { title: 'Discipline', subtext: 'Stay consistent, no matter what' },
-    'winner-mindset': { title: 'Winner Mindset', subtext: 'Think bigger, grow stronger' },
-    'mental-strength': { title: 'Mental Strength', subtext: 'Train the muscle between your ears' },
+    mindset: { title: 'Winner Mindset', subtext: 'Think bigger, grow stronger' },
+    strength: { title: 'Mental Strength', subtext: 'Train the muscle between your ears' },
     confidence: { title: 'Confidence', subtext: 'Own the room, own yourself' },
     resilience: { title: 'Resilience', subtext: 'Bounce back harder every time' },
 };
@@ -36,6 +37,10 @@ export function ImprovementStep() {
     const selectedCategories = useUserDataStore((s) => s.settings.selectedCategories) as Category[];
     const updateSettings = useUserDataStore((s) => s.updateSettings);
     const { setCanContinue } = useOnboardingControl();
+
+    useEffect(() => {
+        setCanContinue(selectedCategories.length > 0);
+    }, []);
 
     function toggleCategory(cat: Category) {
         const isSelected = selectedCategories.includes(cat);

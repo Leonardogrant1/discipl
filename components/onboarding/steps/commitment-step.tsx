@@ -11,8 +11,8 @@ const ICON_SIZE = 200;
 
 const CATEGORY_GOALS: Record<Category, string> = {
     discipline: 'Become more disciplined',
-    'winner-mindset': 'Build a champion mindset',
-    'mental-strength': 'Become mentally stronger',
+    mindset: 'Build a champion mindset',
+    strength: 'Become mentally stronger',
     confidence: 'Build unshakeable confidence',
     resilience: 'Develop unstoppable resilience',
 };
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     },
     textBlock: {
         alignItems: 'center',
-        gap: 12,
+        gap: 30,
     },
     pactTitle: {
         color: 'white',
@@ -187,6 +187,7 @@ const styles = StyleSheet.create({
     goalList: {
         gap: 10,
         alignSelf: 'stretch',
+        paddingLeft: 17,
     },
     goalRow: {
         flexDirection: 'row',

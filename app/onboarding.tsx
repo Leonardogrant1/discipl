@@ -1,4 +1,6 @@
 import * as Notifications from 'expo-notifications';
+import StoreReview from 'expo-store-review';
+import * as TrackingTransparency from 'expo-tracking-transparency';
 import { router } from 'expo-router';
 
 import { OnboardingProgressWrapper } from '@/components/onboarding/onboarding-progress-wrapper';
@@ -14,6 +16,8 @@ import { ImprovementStep } from '@/components/onboarding/steps/improvement-step'
 import { NameStep } from '@/components/onboarding/steps/name-step';
 import { NotificationScheduleStep } from '@/components/onboarding/steps/notification-schedule-step';
 import { NotificationsStep } from '@/components/onboarding/steps/notifications-step';
+import { RatingStep } from '@/components/onboarding/steps/rating-step';
+import { TrackingStep } from '@/components/onboarding/steps/tracking-step';
 import { ReferralStep } from '@/components/onboarding/steps/referral-step';
 import { SportCategoryStep } from '@/components/onboarding/steps/sport-category-step';
 import { TrialOfferStep } from '@/components/onboarding/steps/trial-offer-step';
@@ -31,6 +35,13 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     component: ChampionsStep,
     showProgressIndicator: false,
+  },
+  {
+    component: TrackingStep,
+    continueButtonText: 'Continue',
+    preContinue: async () => {
+      await TrackingTransparency.requestTrackingPermissionsAsync();
+    },
   },
   {
     component: NameStep,
@@ -89,6 +100,21 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     component: CommitmentStep,
     showContinueButton: false,
+  },
+  {
+    component: RatingStep,
+    showProgressIndicator: false,
+    continueButtonText: 'Rate Now',
+    preContinue: async () => {
+      try {
+        const isAvailable = await StoreReview.isAvailableAsync();
+        if (isAvailable) {
+          await StoreReview.requestReview();
+        }
+      } catch (_) {
+        // silently continue if store review fails
+      }
+    },
   },
   {
     component: TrialOfferStep,

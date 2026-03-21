@@ -23,7 +23,7 @@ export function NotificationsStep() {
 
     return (
         <View style={styles.container}>
-            <Animated.View style={{ opacity: titleOpacity, transform: [{ translateY: titleY }] }}>
+            <Animated.View style={[styles.titleContainer, { opacity: titleOpacity, transform: [{ translateY: titleY }] }]}>
                 <Text style={styles.title}>Stay on track.{'\n'}Every single day.</Text>
                 <Text style={styles.subtitle}>
                     To receive your daily affirmations, enable notifications.
@@ -47,17 +47,22 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         gap: 24,
     },
+    titleContainer: {
+        alignItems: "center",
+    },
     title: {
         color: 'white',
         fontSize: 32,
         fontWeight: '700',
         lineHeight: 42,
         marginBottom: 12,
+        textAlign: "center",
     },
     subtitle: {
         color: 'rgba(255,255,255,0.6)',
         fontSize: 16,
         lineHeight: 24,
+        textAlign: "center",
     },
     warning: {
         flexDirection: 'row',

@@ -1,13 +1,13 @@
 import confidence from './confidence.json'
 import discipline from './discipline.json'
-import mentalStrength from './mental-strength.json'
+import mindset from './mindset.json'
 import resilience from './resilience.json'
-import winnerMindset from './winner-mindset.json'
+import strength from './strength.json'
 
 export const quotesByCategory = {
     discipline,
-    'winner-mindset': winnerMindset,
-    'mental-strength': mentalStrength,
+    mindset,
+    strength,
     confidence,
     resilience,
 } as const
@@ -16,8 +16,8 @@ export type Category = keyof typeof quotesByCategory
 
 export const ALL_CATEGORIES: Category[] = [
     'discipline',
-    'winner-mindset',
-    'mental-strength',
+    'mindset',
+    'strength',
     'confidence',
     'resilience',
 ]
@@ -31,8 +31,10 @@ export type Quote = {
 export type FeedQuote = Quote & { category: Category }
 
 export function buildFeed(categories: Category[]): FeedQuote[] {
-    const quotes: FeedQuote[] = categories.flatMap((cat) =>
-        quotesByCategory[cat].map((q) => ({ ...q, category: cat }))
+    const quotes: FeedQuote[] = categories.flatMap((cat) => {
+        console.log(quotesByCategory[cat] ?? "None", cat)
+        return quotesByCategory[cat].map((q) => ({ ...q, category: cat }))
+    }
     )
     // Fisher-Yates shuffle
     for (let i = quotes.length - 1; i > 0; i--) {
