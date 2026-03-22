@@ -1,7 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import StoreReview from 'expo-store-review';
 import * as TrackingTransparency from 'expo-tracking-transparency';
-import { router } from 'expo-router';
 
 import { OnboardingProgressWrapper } from '@/components/onboarding/onboarding-progress-wrapper';
 import { ActivityStep } from '@/components/onboarding/steps/activity-step';
@@ -17,9 +16,9 @@ import { NameStep } from '@/components/onboarding/steps/name-step';
 import { NotificationScheduleStep } from '@/components/onboarding/steps/notification-schedule-step';
 import { NotificationsStep } from '@/components/onboarding/steps/notifications-step';
 import { RatingStep } from '@/components/onboarding/steps/rating-step';
-import { TrackingStep } from '@/components/onboarding/steps/tracking-step';
 import { ReferralStep } from '@/components/onboarding/steps/referral-step';
 import { SportCategoryStep } from '@/components/onboarding/steps/sport-category-step';
+import { TrackingStep } from '@/components/onboarding/steps/tracking-step';
 import { TrialOfferStep } from '@/components/onboarding/steps/trial-offer-step';
 import { TrialReminderStep } from '@/components/onboarding/steps/trial-reminder-step';
 import { WelcomeStep } from '@/components/onboarding/steps/welcome-step';
@@ -133,15 +132,11 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 export default function OnboardingScreen() {
   const completeOnboarding = useUserDataStore((s) => s.completeOnboarding);
 
-  function handleComplete() {
-    completeOnboarding();
-    router.replace('/home');
-  }
+
 
   return (
     <OnboardingProgressWrapper
       steps={ONBOARDING_STEPS}
-      onComplete={handleComplete}
     />
   );
 }

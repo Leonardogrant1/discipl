@@ -14,7 +14,7 @@ const defaultUserSettings: UserDataSettings = {
     notificationEndHour: 20,
     randomizeNotificationTimes: true,
     selectedCategories: ["discipline", "mindset", "strength"] as string[],
-    selectedSport: null,
+    selectedSports: [],
 }
 
 const defaultStreakData: StreakData = {

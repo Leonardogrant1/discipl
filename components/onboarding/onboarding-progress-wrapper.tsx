@@ -1,19 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { useRevenueCat } from '@/services/revenuecat/providers/RevenueCatProvider';
+import { useUserDataStore } from '@/stores/UserDataStore';
+import { router } from 'expo-router';
 import { OnboardingControlContext } from './onboarding-control-context';
 import { OnboardingStep } from './types';
 
 type Props = {
     steps: OnboardingStep[];
-    onComplete: () => void;
 };
 
-export function OnboardingProgressWrapper({ steps, onComplete }: Props) {
+export function OnboardingProgressWrapper({ steps }: Props) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [canContinue, setCanContinue] = useState(steps[0].initialCanContinue ?? true);
     const [isLoading, setIsLoading] = useState(false);
     const inFlightRef = useRef(false);
+    const { presentPaywall } = useRevenueCat()
 
     const opacity = useRef(new Animated.Value(1)).current;
     const translateX = useRef(new Animated.Value(0)).current;
@@ -43,13 +46,31 @@ export function OnboardingProgressWrapper({ steps, onComplete }: Props) {
         ]).start();
     }
 
+    async function finishOnboarding() {
+        //set hasOnboarded to true
+        useUserDataStore.getState().completeOnboarding();
+        const res = await presentPaywall()
+
+        switch (res) {
+            case 'PURCHASED':
+            case 'RESTORED':
+                router.replace('/home');
+                break;
+            case 'NOT_PRESENTED':
+            case 'ERROR':
+            case 'CANCELLED':
+                //show snackbar
+                break;
+        }
+    }
+
     function advance() {
         if (currentIndex < steps.length - 1) {
             const nextIndex = currentIndex + 1;
             setCurrentIndex(nextIndex);
             setCanContinue(steps[nextIndex].initialCanContinue ?? true);
         } else {
-            onComplete();
+            finishOnboarding()
         }
     }
 
@@ -74,7 +95,7 @@ export function OnboardingProgressWrapper({ steps, onComplete }: Props) {
     }, [currentIndex]);
 
     return (
-        <OnboardingControlContext.Provider value={{ currentIndex, canContinue, setCanContinue, nextStep }}>
+        <OnboardingControlContext.Provider value={{ currentIndex, canContinue, finishOnboarding, setCanContinue, nextStep }}>
             <View style={[styles.container, isLight && styles.containerLight]}>
                 {showProgress && (
                     <View style={styles.progressBar}>

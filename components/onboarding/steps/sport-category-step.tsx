@@ -1,17 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Animated, ImageBackground, ImageSourcePropType, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useOnboardingControl } from '../onboarding-control-context';
+import { useUserDataStore } from '@/stores/UserDataStore';
 
-const CATEGORIES: { label: string; examples: string; image: ImageSourcePropType }[] = [
-    { label: 'Combat Sports', examples: 'Boxing, MMA, Wrestling...', image: require('@/assets/category-images/combat.jpg') },
-    { label: 'Team Sports', examples: 'Football, Basketball...', image: require('@/assets/category-images/team.jpeg') },
-    { label: 'Athletics', examples: 'Running, Jumping...', image: require('@/assets/category-images/athletics.jpg') },
-    { label: 'Strength & Power', examples: 'Weightlifting, CrossFit...', image: require('@/assets/category-images/strength.jpg') },
-    { label: 'Water Sports', examples: 'Swimming, Surfing...', image: require('@/assets/category-images/water.jpeg') },
-    { label: 'Racket Sports', examples: 'Tennis, Badminton...', image: require('@/assets/category-images/racket.jpeg') },
-    { label: 'Endurance', examples: 'Cycling, Triathlon...', image: require('@/assets/category-images/endurance.jpeg') },
-    { label: 'Other', examples: '', image: require('@/assets/category-images/other.jpeg') },
+const CATEGORIES: { slug: string; label: string; examples: string; image: ImageSourcePropType }[] = [
+    { slug: 'combat-sports', label: 'Combat Sports', examples: 'Boxing, MMA, Wrestling...', image: require('@/assets/category-images/combat.jpg') },
+    { slug: 'team-sports', label: 'Team Sports', examples: 'Football, Basketball...', image: require('@/assets/category-images/team.jpeg') },
+    { slug: 'athletics', label: 'Athletics', examples: 'Running, Jumping...', image: require('@/assets/category-images/athletics.jpg') },
+    { slug: 'strength-power', label: 'Strength & Power', examples: 'Weightlifting, CrossFit...', image: require('@/assets/category-images/strength.jpg') },
+    { slug: 'water-sports', label: 'Water Sports', examples: 'Swimming, Surfing...', image: require('@/assets/category-images/water.jpeg') },
+    { slug: 'racket-sports', label: 'Racket Sports', examples: 'Tennis, Badminton...', image: require('@/assets/category-images/racket.jpeg') },
+    { slug: 'endurance', label: 'Endurance', examples: 'Cycling, Triathlon...', image: require('@/assets/category-images/endurance.jpeg') },
+    { slug: 'other', label: 'Other', examples: '', image: require('@/assets/category-images/other.jpeg') },
 ];
 
 function CardItem({
@@ -52,24 +53,31 @@ function CardItem({
 
 export function SportCategoryStep() {
     const { setCanContinue } = useOnboardingControl();
-    const [value, setValue] = useState<string | null>(null);
+    const selectedSports = useUserDataStore((s) => s.settings.selectedSports);
+    const updateSettings = useUserDataStore((s) => s.updateSettings);
+
+    const toggle = (slug: string) => {
+        const isSelected = selectedSports.includes(slug);
+        const next = isSelected
+            ? selectedSports.filter((s) => s !== slug)
+            : [...selectedSports, slug];
+        updateSettings({ selectedSports: next });
+        setCanContinue(next.length > 0);
+    };
 
     return (
         <View style={styles.container}>
             <Text style={styles.question}>What's your sport?</Text>
 
             <View style={styles.grid}>
-                {CATEGORIES.map((cat, i) => (
+                {CATEGORIES.map((cat) => (
                     <CardItem
-                        key={cat.label}
+                        key={cat.slug}
                         label={cat.label}
                         examples={cat.examples}
                         image={cat.image}
-                        selected={value === cat.label}
-                        onPress={() => {
-                            setValue(cat.label);
-                            setCanContinue(true);
-                        }}
+                        selected={selectedSports.includes(cat.slug)}
+                        onPress={() => toggle(cat.slug)}
                     />
                 ))}
             </View>

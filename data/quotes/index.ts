@@ -32,7 +32,6 @@ export type FeedQuote = Quote & { category: Category }
 
 export function buildFeed(categories: Category[]): FeedQuote[] {
     const quotes: FeedQuote[] = categories.flatMap((cat) => {
-        console.log(quotesByCategory[cat] ?? "None", cat)
         return quotesByCategory[cat].map((q) => ({ ...q, category: cat }))
     }
     )

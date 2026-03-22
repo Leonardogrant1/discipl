@@ -1,7 +1,7 @@
 
 
 
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { Platform } from "react-native";
 import Purchases, { PurchasesEntitlementInfos, PurchasesPackage } from "react-native-purchases";
 import RevenueCatUI, { PAYWALL_RESULT } from "react-native-purchases-ui";
@@ -11,7 +11,7 @@ import { REVENUECAT_API_KEYS } from "../constants";
 
 interface RevenueCatContextType {
     packages: PurchasesPackage[];
-    presentPaywall: () => Promise<boolean>;
+    presentPaywall: () => Promise<PAYWALL_RESULT>;
     getUserEntitlements: () => Promise<PurchasesEntitlementInfos>;
 }
 
@@ -54,19 +54,11 @@ export function RevenueCatProvider({ children }: RevenueCatProviderProps) {
     const presentPaywall = async () => {
 
         // Present paywall for current offering:
-        const paywallResult: PAYWALL_RESULT = await RevenueCatUI.presentPaywall();
+        const paywallResult: PAYWALL_RESULT = await RevenueCatUI.presentPaywallIfNeeded({
+            requiredEntitlementIdentifier: "Discipl Premium"
+        });
 
-        switch (paywallResult) {
-            case PAYWALL_RESULT.NOT_PRESENTED:
-            case PAYWALL_RESULT.ERROR:
-            case PAYWALL_RESULT.CANCELLED:
-                return false;
-            case PAYWALL_RESULT.PURCHASED:
-            case PAYWALL_RESULT.RESTORED:
-                return true;
-            default:
-                return false;
-        }
+        return paywallResult;
     }
 
     return (
@@ -74,5 +66,11 @@ export function RevenueCatProvider({ children }: RevenueCatProviderProps) {
             {children}
         </RevenueCatContext.Provider>
     );
+}
+
+export const useRevenueCat = () => {
+    const ctx = useContext(RevenueCatContext);
+    if (!ctx) throw new Error("useRevenueCat must be used within RevenueCatProvider");
+    return ctx;
 }
 

@@ -4,9 +4,6 @@ import { Redirect } from 'expo-router';
 export default function Index() {
     const hasCompletedOnboarding = useUserDataStore((s) => s.hasCompletedOnboarding);
 
-    console.log(hasCompletedOnboarding);
-
-
     if (!hasCompletedOnboarding) {
         return <Redirect href="/start" />
     }

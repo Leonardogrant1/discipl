@@ -1,4 +1,5 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, FlatList, Share, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View, ViewToken } from 'react-native';
@@ -12,6 +13,7 @@ import { Fonts } from '@/constants/theme';
 import { buildFeed, Category, FeedQuote } from '@/data/quotes';
 import { checkAndReschedule, scheduleNotifications } from '@/services/notifications';
 import { posthog } from '@/services/posthog';
+import { useRevenueCat } from '@/services/revenuecat/providers/RevenueCatProvider';
 import { useUserDataStore } from '@/stores/UserDataStore';
 
 
@@ -26,6 +28,18 @@ export default function HomeScreen() {
     const toggleLikedQuote = useUserDataStore((s) => s.toggleLikedQuote);
     const checkAndUpdateStreak = useUserDataStore((s) => s.checkAndUpdateStreak);
     const settings = useUserDataStore((s) => s.settings);
+    const { getUserEntitlements, presentPaywall } = useRevenueCat();
+
+    useEffect(() => {
+        async function checkEntitlements() {
+            const entitlements = await getUserEntitlements();
+            if (!entitlements.active['Discipl Premium']) {
+                await Notifications.cancelAllScheduledNotificationsAsync();
+                await presentPaywall();
+            }
+        }
+        checkEntitlements();
+    }, []);
 
     useEffect(() => {
         checkAndUpdateStreak();

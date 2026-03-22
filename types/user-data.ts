@@ -10,5 +10,5 @@ export type UserDataSettings = {
     notificationEndHour: number
     randomizeNotificationTimes: boolean
     selectedCategories: string[]
-    selectedSport: string | null
+    selectedSports: string[]
 }
