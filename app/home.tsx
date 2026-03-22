@@ -2,13 +2,17 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, FlatList, Share, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View, ViewToken } from 'react-native';
+import { Animated, Share, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View, ViewToken } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import BallIcon from '@/assets/icons/ball.svg';
 import HeartIcon from '@/assets/icons/heart.svg';
 import ShareIcon from '@/assets/icons/share.svg';
 import UserIcon from '@/assets/icons/user.svg';
+import { getRandomSportImage } from '@/assets/sports-images';
 import { CategoriesModal } from '@/components/categories-modal';
 import { SettingsModal } from '@/components/settings-modal';
+import { SportsModal } from '@/components/sports-modal';
 import { Fonts } from '@/constants/theme';
 import { buildFeed, Category, FeedQuote } from '@/data/quotes';
 import { checkAndReschedule, scheduleNotifications } from '@/services/notifications';
@@ -19,11 +23,14 @@ import { useUserDataStore } from '@/stores/UserDataStore';
 
 export default function HomeScreen() {
     const { height } = useWindowDimensions();
+    const insets = useSafeAreaInsets();
     const [settingsVisible, setSettingsVisible] = useState(false);
     const [categoriesVisible, setCategoriesVisible] = useState(false);
+    const [sportsVisible, setSportsVisible] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const selectedCategories = useUserDataStore((s) => s.settings.selectedCategories) as Category[];
+    const selectedSports = useUserDataStore((s) => s.settings.selectedSports);
     const likedQuoteIds = useUserDataStore((s) => s.likedQuoteIds);
     const toggleLikedQuote = useUserDataStore((s) => s.toggleLikedQuote);
     const checkAndUpdateStreak = useUserDataStore((s) => s.checkAndUpdateStreak);
@@ -63,6 +70,16 @@ export default function HomeScreen() {
 
     const feed = useMemo(() => buildFeed(selectedCategories), [selectedCategories]);
 
+    const feedImages = useMemo(() => {
+        const recent: number[] = [];
+        return feed.map(() => {
+            const img = getRandomSportImage(selectedSports, recent);
+            recent.push(img);
+            if (recent.length > 3) recent.shift();
+            return img;
+        });
+    }, [feed, selectedSports]);
+
     const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
         if (viewableItems[0]) setCurrentIndex(viewableItems[0].index ?? 0);
     });
@@ -94,6 +111,9 @@ export default function HomeScreen() {
         }
     }, [likedQuoteIds.length]);
 
+    const scrollY = useRef(new Animated.Value(0)).current;
+    const quoteOpacity = useRef(new Animated.Value(1)).current;
+
     const swipeAnim = useRef(new Animated.Value(0)).current;
     useEffect(() => {
         Animated.loop(
@@ -111,31 +131,66 @@ export default function HomeScreen() {
     return (
         <View style={styles.container}>
             {/* Scrolling quote feed */}
-            <FlatList
+            <Animated.FlatList
                 data={feed}
                 keyExtractor={(item) => item.id}
                 pagingEnabled
                 showsVerticalScrollIndicator={false}
                 snapToInterval={height}
                 decelerationRate="fast"
+                onScroll={Animated.event(
+                    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                    { useNativeDriver: true }
+                )}
+                scrollEventThrottle={16}
+                onScrollBeginDrag={() =>
+                    Animated.timing(quoteOpacity, { toValue: 0, duration: 150, useNativeDriver: true }).start()
+                }
+                onMomentumScrollEnd={() =>
+                    Animated.timing(quoteOpacity, { toValue: 1, duration: 250, useNativeDriver: true }).start()
+                }
                 onViewableItemsChanged={onViewableItemsChanged.current}
                 viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
-                renderItem={({ item }) => (
+                renderItem={({ index }) => (
                     <View style={[styles.card, { height }]}>
-                        <View style={styles.placeholder} />
-                        <View style={styles.overlay} />
-                        <View style={styles.quoteContainer}>
-                            <Text style={[styles.quoteText, { fontFamily: Fonts?.serif }]}>{item.text}</Text>
-                        </View>
+                        <Animated.Image
+                            source={feedImages[index]}
+                            style={[
+                                styles.bgImage,
+                                {
+                                    top: -insets.top,
+                                    height: height + insets.top + insets.bottom,
+                                    transform: [{ translateY: Animated.subtract(scrollY, index * height) }],
+                                    opacity: scrollY.interpolate({
+                                        inputRange: [(index - 1) * height, index * height, (index + 1) * height],
+                                        outputRange: [0, 1, 0],
+                                        extrapolate: 'clamp',
+                                    }),
+                                },
+                            ]}
+                            resizeMode="cover"
+                        />
                     </View>
                 )}
             />
+
+            {/* Fixed overlay + quote text */}
+            <View style={StyleSheet.absoluteFill} pointerEvents="none">
+                <View style={[StyleSheet.absoluteFill, styles.overlay]} />
+            </View>
+            <Animated.View style={[styles.quoteContainer, { opacity: quoteOpacity }]} pointerEvents="none">
+                <Text style={[styles.quoteText, { fontFamily: Fonts?.serif }]}>{currentQuote?.text}</Text>
+            </Animated.View>
+
+
 
             {/* Fixed UI overlay */}
             <View style={styles.fixedOverlay} pointerEvents="box-none">
                 {/* Top bar */}
                 <View style={styles.topBar} pointerEvents="box-none">
-                    <View style={{ width: 22 }} />
+                    <TouchableOpacity style={styles.iconButton} onPress={() => setSportsVisible(true)}>
+                        <BallIcon width={22} height={22} color="white" />
+                    </TouchableOpacity>
                     <Animated.View style={[styles.heartsRow, { opacity: heartsOpacity, transform: [{ scale: heartsScale }] }]}>
                         <HeartIcon width={15} height={15} color="white" />
                         <Text style={styles.heartsText}>{likeCount}/5</Text>
@@ -190,6 +245,7 @@ export default function HomeScreen() {
 
             <SettingsModal visible={settingsVisible} onClose={() => setSettingsVisible(false)} />
             <CategoriesModal visible={categoriesVisible} onClose={() => setCategoriesVisible(false)} />
+            <SportsModal visible={sportsVisible} onClose={() => setSportsVisible(false)} />
         </View>
     );
 }
@@ -200,18 +256,19 @@ const styles = StyleSheet.create({
         backgroundColor: '#000',
     },
     card: {
-        backgroundColor: '#111',
+        backgroundColor: 'transparent',
     },
-    placeholder: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: '#2a2a2a',
+    bgImage: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
     },
     overlay: {
         ...StyleSheet.absoluteFillObject,
         backgroundColor: 'rgba(0,0,0,0.45)',
     },
     quoteContainer: {
-        flex: 1,
+        ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
         paddingHorizontal: 32,
         paddingBottom: 80,
