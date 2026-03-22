@@ -1,4 +1,4 @@
-import * as Notifications from 'expo-notifications';
+import { useMemo } from 'react';
 import StoreReview from 'expo-store-review';
 import * as TrackingTransparency from 'expo-tracking-transparency';
 
@@ -24,114 +24,116 @@ import { TrialReminderStep } from '@/components/onboarding/steps/trial-reminder-
 import { WelcomeStep } from '@/components/onboarding/steps/welcome-step';
 import { WhatYouWillGetStep } from '@/components/onboarding/steps/what-you-will-get-step';
 import { OnboardingStep } from '@/components/onboarding/types';
-import { useUserDataStore } from '@/stores/UserDataStore';
+import { useNotifications } from '@/contexts/NotificationContext';
 
-const ONBOARDING_STEPS: OnboardingStep[] = [
-  {
-    component: WelcomeStep,
-    showProgressIndicator: false,
-  },
-  {
-    component: ChampionsStep,
-    showProgressIndicator: false,
-  },
-  {
-    component: TrackingStep,
-    continueButtonText: 'Continue',
-    preContinue: async () => {
-      await TrackingTransparency.requestTrackingPermissionsAsync();
-    },
-  },
-  {
-    component: NameStep,
-    continueButtonText: 'Continue',
-    initialCanContinue: false,
-  },
-  {
-    component: GenderStep,
-    initialCanContinue: false,
-  },
-  {
-    component: ReferralStep,
-    initialCanContinue: false,
-  },
-  {
-    component: AgeStep,
-    initialCanContinue: false,
-  },
-  {
-    component: SportCategoryStep,
-    initialCanContinue: false,
-  },
-  {
-    component: ActivityStep,
-    initialCanContinue: false,
-  },
-  {
-    component: AffirmationsFamiliarityStep,
-    initialCanContinue: false,
-  },
-  {
-    component: ImprovementStep,
-    continueButtonText: 'Continue',
-    initialCanContinue: false,
-  },
-  {
-    component: HabitStep,
-    continueButtonText: 'Build my habit',
-  },
-  {
-    component: NotificationScheduleStep,
-    continueButtonText: 'Continue',
-  },
-  {
-    component: NotificationsStep,
-    continueButtonText: 'Enable Notifications',
-    preContinue: async () => {
-      await Notifications.requestPermissionsAsync();
-    },
-  },
-  {
-    component: AddWidgetStep,
-    continueButtonText: 'I will!',
-    initialCanContinue: false,
-  },
-  {
-    component: CommitmentStep,
-    showContinueButton: false,
-  },
-  {
-    component: RatingStep,
-    showProgressIndicator: false,
-    continueButtonText: 'Rate Now',
-    preContinue: async () => {
-      try {
-        const isAvailable = await StoreReview.isAvailableAsync();
-        if (isAvailable) {
-          await StoreReview.requestReview();
-        }
-      } catch (_) {
-        // silently continue if store review fails
-      }
-    },
-  },
-  {
-    component: TrialOfferStep,
-    continueButtonText: 'Continue',
-  },
-  {
-    component: TrialReminderStep,
-    continueButtonText: 'Continue',
-  },
-  {
-    component: WhatYouWillGetStep,
-    continueButtonText: "Let's get started!",
-  },
-];
+
 
 export default function OnboardingScreen() {
-  const completeOnboarding = useUserDataStore((s) => s.completeOnboarding);
 
+  const { registerPushNotificationsAndSaveToken } = useNotifications();
+
+  const ONBOARDING_STEPS = useMemo<OnboardingStep[]>(() => [
+    {
+      component: WelcomeStep,
+      showProgressIndicator: false,
+    },
+    {
+      component: ChampionsStep,
+      showProgressIndicator: false,
+    },
+    {
+      component: TrackingStep,
+      continueButtonText: 'Continue',
+      preContinue: async () => {
+        await TrackingTransparency.requestTrackingPermissionsAsync();
+      },
+    },
+    {
+      component: NameStep,
+      continueButtonText: 'Continue',
+      initialCanContinue: false,
+    },
+    {
+      component: GenderStep,
+      initialCanContinue: false,
+    },
+    {
+      component: ReferralStep,
+      initialCanContinue: false,
+    },
+    {
+      component: AgeStep,
+      initialCanContinue: false,
+    },
+    {
+      component: SportCategoryStep,
+      initialCanContinue: false,
+    },
+    {
+      component: ActivityStep,
+      initialCanContinue: false,
+    },
+    {
+      component: AffirmationsFamiliarityStep,
+      initialCanContinue: false,
+    },
+    {
+      component: ImprovementStep,
+      continueButtonText: 'Continue',
+      initialCanContinue: false,
+    },
+    {
+      component: HabitStep,
+      continueButtonText: 'Build my habit',
+    },
+    {
+      component: NotificationScheduleStep,
+      continueButtonText: 'Continue',
+    },
+    {
+      component: NotificationsStep,
+      continueButtonText: 'Enable Notifications',
+      preContinue: async () => {
+        await registerPushNotificationsAndSaveToken();
+      },
+    },
+    {
+      component: AddWidgetStep,
+      continueButtonText: 'I will!',
+      initialCanContinue: false,
+    },
+    {
+      component: CommitmentStep,
+      showContinueButton: false,
+    },
+    {
+      component: RatingStep,
+      showProgressIndicator: false,
+      continueButtonText: 'Rate Now',
+      preContinue: async () => {
+        try {
+          const isAvailable = await StoreReview.isAvailableAsync();
+          if (isAvailable) {
+            await StoreReview.requestReview();
+          }
+        } catch (_) {
+          // silently continue if store review fails
+        }
+      },
+    },
+    {
+      component: TrialOfferStep,
+      continueButtonText: 'Continue',
+    },
+    {
+      component: TrialReminderStep,
+      continueButtonText: 'Continue',
+    },
+    {
+      component: WhatYouWillGetStep,
+      continueButtonText: "Let's get started!",
+    },
+  ], [registerPushNotificationsAndSaveToken]);
 
 
   return (

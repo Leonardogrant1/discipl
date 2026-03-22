@@ -3,6 +3,7 @@ import { createMMKV } from 'react-native-mmkv';
 
 import { buildFeed, Category } from '@/data/quotes';
 import { UserDataSettings } from '@/types/user-data';
+import { devLog } from '@/utils/dev-log';
 
 const storage = createMMKV({ id: 'notification-storage' });
 const LAST_SCHEDULED_KEY = 'lastScheduled';
@@ -28,12 +29,14 @@ export async function scheduleNotifications(settings: UserDataSettings): Promise
     const allQuotes = buildFeed(selectedCategories as Category[]);
     if (allQuotes.length === 0) return;
 
-    const totalNeeded = 14 * notificationsPerDay;
+    const MAX_NOTIFICATIONS = 60; // Puffer lassen
+    const days = Math.floor(MAX_NOTIFICATIONS / notificationsPerDay);
+    const totalNeeded = days * notificationsPerDay;
     let quoteIndex = 0;
 
     const scheduled: Promise<string>[] = [];
 
-    for (let day = 0; day < 14; day++) {
+    for (let day = 0; day < days; day++) {
         const date = new Date();
         date.setDate(date.getDate() + day + 1);
 
@@ -71,7 +74,7 @@ export async function scheduleNotifications(settings: UserDataSettings): Promise
 
     await Promise.all(scheduled);
     storage.set(LAST_SCHEDULED_KEY, new Date().toISOString());
-    console.log(`Scheduled ${totalNeeded} notifications over 14 days`);
+    devLog(`Scheduled ${totalNeeded} notifications over ${days} days`);
 }
 
 export async function checkAndReschedule(settings: UserDataSettings): Promise<void> {

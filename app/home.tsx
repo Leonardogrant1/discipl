@@ -15,10 +15,10 @@ import { SettingsModal } from '@/components/settings-modal';
 import { SportsModal } from '@/components/sports-modal';
 import { Fonts } from '@/constants/theme';
 import { buildFeed, Category, FeedQuote } from '@/data/quotes';
-import { checkAndReschedule, scheduleNotifications } from '@/services/notifications';
 import { posthog } from '@/services/posthog';
 import { useRevenueCat } from '@/services/revenuecat/providers/RevenueCatProvider';
 import { useUserDataStore } from '@/stores/UserDataStore';
+import { devLog } from '@/utils/dev-log';
 
 
 export default function HomeScreen() {
@@ -34,8 +34,9 @@ export default function HomeScreen() {
     const likedQuoteIds = useUserDataStore((s) => s.likedQuoteIds);
     const toggleLikedQuote = useUserDataStore((s) => s.toggleLikedQuote);
     const checkAndUpdateStreak = useUserDataStore((s) => s.checkAndUpdateStreak);
-    const settings = useUserDataStore((s) => s.settings);
     const { getUserEntitlements, presentPaywall } = useRevenueCat();
+
+
 
     useEffect(() => {
         async function checkEntitlements() {
@@ -50,23 +51,7 @@ export default function HomeScreen() {
 
     useEffect(() => {
         checkAndUpdateStreak();
-        checkAndReschedule(settings);
     }, []);
-
-    const isFirstRender = useRef(true);
-    useEffect(() => {
-        if (isFirstRender.current) {
-            isFirstRender.current = false;
-            return;
-        }
-        scheduleNotifications(settings);
-    }, [
-        settings.notificationsEnabled,
-        settings.notificationsPerDay,
-        settings.notificationStartHour,
-        settings.notificationEndHour,
-        settings.selectedCategories.join(','),
-    ]);
 
     const feed = useMemo(() => buildFeed(selectedCategories), [selectedCategories]);
 
@@ -232,15 +217,37 @@ export default function HomeScreen() {
             </View>
 
             {__DEV__ && (
-                <TouchableOpacity
-                    style={styles.debugButton}
-                    onPress={() => {
-                        useUserDataStore.setState({ hasCompletedOnboarding: false });
-                        router.replace('/start');
-                    }}
-                >
-                    <Text style={styles.debugButtonText}>⚙ Onboarding</Text>
-                </TouchableOpacity>
+                <View style={styles.debugContainer}>
+                    <TouchableOpacity
+                        style={styles.debugButton}
+                        onPress={() => {
+                            useUserDataStore.setState({ hasCompletedOnboarding: false });
+                            router.replace('/start');
+                        }}
+                    >
+                        <Text style={styles.debugButtonText}>⚙ Onboarding</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.debugButton}
+                        onPress={async () => {
+                            const scheduleId = await Notifications.scheduleNotificationAsync({
+                                content: {
+                                    title: "DEV: Test Push 🚀",
+                                    body: "Diese Benachrichtigung wurde vor 5 Sekunden geplant.",
+                                    sound: true,
+                                },
+                                trigger: { seconds: 5, type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL },
+                            });
+                            devLog('Scheduled ID:', scheduleId)
+
+
+                            const all = await Notifications.getAllScheduledNotificationsAsync()
+                            devLog('All scheduled:', all.length)
+                        }}
+                    >
+                        <Text style={styles.debugButtonText}>🔔 Test Push (5s)</Text>
+                    </TouchableOpacity>
+                </View>
             )}
 
             <SettingsModal visible={settingsVisible} onClose={() => setSettingsVisible(false)} />
@@ -363,10 +370,14 @@ const styles = StyleSheet.create({
         borderRadius: 24,
         overflow: 'hidden',
     },
-    debugButton: {
+    debugContainer: {
         position: 'absolute',
         bottom: 100,
         right: 16,
+        gap: 8,
+        alignItems: 'flex-end',
+    },
+    debugButton: {
         backgroundColor: 'rgba(255,59,48,0.85)',
         paddingHorizontal: 12,
         paddingVertical: 6,

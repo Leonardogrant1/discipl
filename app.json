@@ -34,7 +34,8 @@
     "plugins": [
       "expo-router",
       "expo-video",
-      "expo-tracking-transparency"
+      "expo-tracking-transparency",
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,

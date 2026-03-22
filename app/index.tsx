@@ -1,6 +1,8 @@
 import { useUserDataStore } from '@/stores/UserDataStore';
 import { Redirect } from 'expo-router';
 
+
+
 export default function Index() {
     const hasCompletedOnboarding = useUserDataStore((s) => s.hasCompletedOnboarding);
 
