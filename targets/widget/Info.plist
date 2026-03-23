@@ -7,5 +7,9 @@
       <key>NSExtensionPointIdentifier</key>
       <string>com.apple.widgetkit-extension</string>
     </dict>
+    <key>AppGroup</key>
+    <string>group.studio.northbyte.discipl</string>
+    <key>AppGroupIdentifier</key>
+    <string>group.studio.northbyte.discipl</string>
   </dict>
 </plist>

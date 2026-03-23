@@ -17,6 +17,7 @@ import { Fonts } from '@/constants/theme';
 import { buildFeed, Category, FeedQuote } from '@/data/quotes';
 import { posthog } from '@/services/posthog';
 import { useRevenueCat } from '@/services/revenuecat/providers/RevenueCatProvider';
+import { syncWidgetData } from '@/services/widgets/storage';
 import { useUserDataStore } from '@/stores/UserDataStore';
 import { devLog } from '@/utils/dev-log';
 
@@ -35,7 +36,7 @@ export default function HomeScreen() {
     const toggleLikedQuote = useUserDataStore((s) => s.toggleLikedQuote);
     const checkAndUpdateStreak = useUserDataStore((s) => s.checkAndUpdateStreak);
     const { getUserEntitlements, presentPaywall } = useRevenueCat();
-
+    const settings = useUserDataStore((s) => s.settings);
 
 
     useEffect(() => {
@@ -54,6 +55,11 @@ export default function HomeScreen() {
     }, []);
 
     const feed = useMemo(() => buildFeed(selectedCategories), [selectedCategories]);
+
+
+    useEffect(() => {
+        syncWidgetData(settings)
+    }, [settings])
 
     const feedImages = useMemo(() => {
         const recent: number[] = [];

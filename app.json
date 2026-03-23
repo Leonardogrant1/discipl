@@ -18,8 +18,12 @@
       "appleTeamId": "KJQ52F94YM",
       "entitlements": {
         "com.apple.security.application-groups": [
-          "group.studio.northbyte.descipl"
+          "group.studio.northbyte.discipl"
         ]
+      },
+      "infoPlist": {
+        "AppGroup": "group.studio.northbyte.discipl",
+        "AppGroupIdentifier": "group.studio.northbyte.discipl"
       }
     },
     "android": {

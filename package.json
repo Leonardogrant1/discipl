@@ -1,5 +1,5 @@
 {
-  "name": "descipl",
+  "name": "discipl",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -10,7 +10,8 @@
     "ios:device": "expo run:ios --device",
     "web": "expo start --web",
     "lint": "expo lint",
-    "build-widget": "npx expo prebuild --template node_modules/@bacons/apple-targets/prebuild-blank.tgz --clean"
+    "build-widget": "npx expo prebuild --template ./node_modules/@bacons/apple-targets/prebuild-blank.tgz --clean",
+    "optimize-widget-images": "node scripts/optimize-widget-images.js"
   },
   "dependencies": {
     "@bacons/apple-targets": "^4.0.6",
@@ -63,6 +64,7 @@
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
     "react-native-svg-transformer": "^1.5.3",
+    "sharp": "^0.34.5",
     "typescript": "~5.9.2"
   },
   "private": true,

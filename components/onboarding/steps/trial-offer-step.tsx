@@ -28,7 +28,7 @@ export function TrialOfferStep() {
                 We offer 3 days of premium access, just for you
             </Animated.Text>
             <Animated.Text style={[styles.subtitle, subtitleAnim]}>
-                To let you feel the impact of Descipl
+                To let you feel the impact of Discipl
             </Animated.Text>
         </View>
     );

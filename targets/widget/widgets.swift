@@ -1,50 +1,114 @@
 import WidgetKit
 import SwiftUI
 
-struct Provider: AppIntentTimelineProvider {
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: ConfigurationAppIntent())
+struct QuoteData: Codable {
+    let id: String
+    let text: String
+    let author: String?
+    let category: String
+}
+
+struct Provider: TimelineProvider {
+    func placeholder(in context: Context) -> QuoteEntry {
+        QuoteEntry(date: Date(), quote: "Your discipline today determines your success tomorrow.", image: "athletics/0")
     }
 
-    func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: configuration)
+    func getSnapshot(in context: Context, completion: @escaping (QuoteEntry) -> Void) {
+        completion(QuoteEntry(date: Date(), quote: "Your discipline today determines your success tomorrow.", image: "athletics/0"))
     }
-    
-    func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
-        var entries: [SimpleEntry] = []
 
-        // Generate a timeline consisting of five entries an hour apart, starting from the current date.
-        let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, configuration: configuration)
-            entries.append(entry)
+    func getTimeline(in context: Context, completion: @escaping (Timeline<QuoteEntry>) -> Void) {
+        var entries: [QuoteEntry] = []
+
+        let sharedDefaults = UserDefaults(suiteName: "group.studio.northbyte.discipl")
+        let quotesJsonString = sharedDefaults?.string(forKey: "quotes") ?? "[]"
+        let sportsJsonString = sharedDefaults?.string(forKey: "sportCategories") ?? "[\"athletics\"]"
+        let startHour = sharedDefaults?.object(forKey: "startHour") as? Int ?? 8
+        let endHour = sharedDefaults?.object(forKey: "endHour") as? Int ?? 20
+        let notificationsPerDay = sharedDefaults?.object(forKey: "notificationsPerDay") as? Int ?? 5
+        print("quotesJsonString: \(quotesJsonString)")
+        print("sportsJsonString: \(sportsJsonString)")
+        print("startHour: \(startHour)")
+        print("endHour: \(endHour)")
+        print("notificationsPerDay: \(notificationsPerDay)")
+
+        var quotes: [QuoteData] = []
+        if let data = quotesJsonString.data(using: .utf8) {
+            quotes = (try? JSONDecoder().decode([QuoteData].self, from: data)) ?? []
         }
 
-        return Timeline(entries: entries, policy: .atEnd)
+        var sportCategories: [String] = ["athletics"]
+        if let sportsData = sportsJsonString.data(using: .utf8),
+           let decodedSports = try? JSONDecoder().decode([String].self, from: sportsData),
+           !decodedSports.isEmpty {
+            sportCategories = decodedSports
+        }
+
+        let currentDate = Date()
+
+        if quotes.isEmpty {
+            for hourOffset in 0 ..< 5 {
+                let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
+                let entry = QuoteEntry(date: entryDate, quote: "Your discipline today determines your success tomorrow.", image: "athletics/0")
+                entries.append(entry)
+            }
+        } else {
+            let totalHours = max(1, endHour - startHour)
+            let interval = max(1, totalHours / max(1, notificationsPerDay))
+
+            for i in 0 ..< notificationsPerDay {
+                if i >= quotes.count { break }
+                let quoteObj = quotes[i]
+
+                let entryDate = Calendar.current.date(byAdding: .hour, value: i * interval, to: currentDate)!
+
+                let randomSport = sportCategories.randomElement() ?? "athletics"
+                let randomImageNumber = Int.random(in: 0...5)
+                let image = "\(randomSport)/\(randomImageNumber)"
+
+                entries.append(QuoteEntry(date: entryDate, quote: quoteObj.text, image: image))
+            }
+        }
+
+        completion(Timeline(entries: entries, policy: .atEnd))
     }
-
-//    func relevances() async -> WidgetRelevances<ConfigurationAppIntent> {
-//        // Generate a list containing the contexts this widget is relevant in.
-//    }
 }
 
-struct SimpleEntry: TimelineEntry {
+struct QuoteEntry: TimelineEntry {
     let date: Date
-    let configuration: ConfigurationAppIntent
+    let quote: String
+    let image: String
 }
 
-struct widgetEntryView : View {
-    var entry: Provider.Entry
+struct QuoteWidgetView: View {
+    var entry: QuoteEntry
+    @Environment(\.widgetFamily) var family
+
+    var fontSize: CGFloat {
+        switch family {
+        case .systemLarge: return 26
+        case .systemMedium: return 22
+        default: return 20
+        }
+    }
 
     var body: some View {
-        VStack {
-            Text("Time:")
-            Text(entry.date, style: .time)
+        Text(entry.quote)
+            .font(.system(size: fontSize, design: .serif))
+            .italic()
+            .foregroundColor(.white)
+            .multilineTextAlignment(.center)
+            .minimumScaleFactor(0.7)
+            .padding(.all, family == .systemLarge ? 24 : nil)
+            .containerBackground(for: .widget) {
+                ZStack {
+                    Image(entry.image)
+                        .resizable()
+                        .scaledToFill()
 
-            Text("Favorite Emoji:")
-            Text(entry.configuration.favoriteEmoji)
-        }
+                    Color.black.opacity(0.45)
+                }
+            }
     }
 }
 
@@ -52,30 +116,16 @@ struct widget: Widget {
     let kind: String = "widget"
 
     var body: some WidgetConfiguration {
-        AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
-            widgetEntryView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
+        StaticConfiguration(kind: kind, provider: Provider()) { entry in
+            QuoteWidgetView(entry: entry)
         }
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
 
-extension ConfigurationAppIntent {
-    fileprivate static var smiley: ConfigurationAppIntent {
-        let intent = ConfigurationAppIntent()
-        intent.favoriteEmoji = "😀"
-        return intent
-    }
-    
-    fileprivate static var starEyes: ConfigurationAppIntent {
-        let intent = ConfigurationAppIntent()
-        intent.favoriteEmoji = "🤩"
-        return intent
-    }
-}
-
-#Preview(as: .systemSmall) {
+#Preview(as: .systemMedium) {
     widget()
 } timeline: {
-    SimpleEntry(date: .now, configuration: .smiley)
-    SimpleEntry(date: .now, configuration: .starEyes)
+    QuoteEntry(date: .now, quote: "Your discipline today determines your success tomorrow.", image: "athletics/0")
+    QuoteEntry(date: .now, quote: "Your discipline today determines your success tomorrow.", image: "athletics/1")
 }
