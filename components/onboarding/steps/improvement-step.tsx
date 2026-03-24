@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { ALL_CATEGORIES, Category } from '@/data/quotes';
+import { trackerManager } from '@/lib/tracking/tracker-manager';
 import { useUserDataStore } from '@/stores/UserDataStore';
 
 import { useOnboardingControl } from '../onboarding-control-context';
@@ -49,6 +50,7 @@ export function ImprovementStep() {
             : [...selectedCategories, cat];
         updateSettings({ selectedCategories: next });
         setCanContinue(next.length > 0);
+        trackerManager.track('onboarding_category_toggled', { category: cat, selected: !isSelected });
     }
 
     return (

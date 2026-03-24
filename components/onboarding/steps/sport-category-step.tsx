@@ -1,3 +1,4 @@
+import { trackerManager } from '@/lib/tracking/tracker-manager';
 import { useOnboardingControl } from '../onboarding-control-context';
 import { useUserDataStore } from '@/stores/UserDataStore';
 import { CATEGORIES, SportCard } from '@/components/sport-card';
@@ -15,6 +16,7 @@ export function SportCategoryStep() {
             : [...selectedSports, slug];
         updateSettings({ selectedSports: next });
         setCanContinue(next.length > 0);
+        trackerManager.track('onboarding_sport_toggled', { sport: slug, selected: !isSelected });
     };
 
     return (

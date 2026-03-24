@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { trackerManager } from '@/lib/tracking/tracker-manager';
 import { useUserDataStore } from '@/stores/UserDataStore';
 
 import { useOnboardingControl } from '../onboarding-control-context';
@@ -27,6 +28,7 @@ export function AffirmationsFamiliarityStep() {
             onChange={(v) => {
                 setValue(v);
                 setCanContinue(true);
+                trackerManager.track('onboarding_affirmations_familiarity', { level: v });
             }}
         />
     );

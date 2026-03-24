@@ -6,6 +6,7 @@ import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
 
 const defaultUserSettings: UserDataSettings = {
     name: '',
+    age: null,
     gender: null,
     improvements: [],
     notificationsEnabled: true,

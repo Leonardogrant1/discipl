@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { trackerManager } from '@/lib/tracking/tracker-manager';
 import { useUserDataStore } from '@/stores/UserDataStore';
 import { Gender } from '@/types/user-data';
 
@@ -23,6 +24,7 @@ export function GenderStep() {
                 setValue(v);
                 updateSettings({ gender: v as Gender });
                 setCanContinue(true);
+                trackerManager.track('onboarding_gender', { gender: v });
             }}
         />
     );

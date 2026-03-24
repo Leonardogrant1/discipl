@@ -2,6 +2,8 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { ALL_CATEGORIES, Category, quotesByCategory } from '@/data/quotes';
+import { trackerManager } from '@/lib/tracking/tracker-manager';
+import { useUserDataStore } from '@/stores/UserDataStore';
 
 const CATEGORY_LABELS: Record<Category, string> = {
   discipline: 'Discipline',
@@ -10,7 +12,6 @@ const CATEGORY_LABELS: Record<Category, string> = {
   confidence: 'Confidence',
   resilience: 'Resilience',
 };
-import { useUserDataStore } from '@/stores/UserDataStore';
 
 type Props = {
   visible: boolean;
@@ -36,11 +37,12 @@ export function CategoriesModal({ visible, onClose }: Props) {
 
   function toggleCategory(cat: Category) {
     const isSelected = selectedCategories.includes(cat);
-    if (isSelected && selectedCategories.length === 1) return; // mindestens eine muss ausgewählt bleiben
+    if (isSelected && selectedCategories.length === 1) return;
     const next = isSelected
       ? selectedCategories.filter((c) => c !== cat)
       : [...selectedCategories, cat];
     updateSettings({ selectedCategories: next });
+    trackerManager.track('category_toggled', { category: cat, selected: !isSelected });
   }
 
   return (
@@ -53,12 +55,6 @@ export function CategoriesModal({ visible, onClose }: Props) {
 
           <Text style={styles.title}>Categories</Text>
 
-          <TouchableOpacity style={styles.createMixButton}>
-            <MaterialIcons name="add" size={18} color="#111" />
-            <Text style={styles.createMixText}>CREATE MY OWN MIX</Text>
-          </TouchableOpacity>
-
-          <Text style={styles.sectionLabel}>All Categories</Text>
           <View style={styles.grid}>
             {ALL_CATEGORIES.map((cat) => (
               <TouchableOpacity key={cat} style={styles.gridItem} onPress={() => toggleCategory(cat)}>

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { useRevenueCat } from '@/services/revenuecat/providers/RevenueCatProvider';
+import { trackerManager } from '@/lib/tracking/tracker-manager';
+import { useSuperwallFunctions } from '@/services/purchases/superwall/useSuperwall';
 import { useUserDataStore } from '@/stores/UserDataStore';
 import { router } from 'expo-router';
 import { OnboardingControlContext } from './onboarding-control-context';
@@ -16,7 +17,7 @@ export function OnboardingProgressWrapper({ steps }: Props) {
     const [canContinue, setCanContinue] = useState(steps[0].initialCanContinue ?? true);
     const [isLoading, setIsLoading] = useState(false);
     const inFlightRef = useRef(false);
-    const { presentPaywall } = useRevenueCat()
+    const { openWithPlacement } = useSuperwallFunctions()
 
     const opacity = useRef(new Animated.Value(1)).current;
     const translateX = useRef(new Animated.Value(0)).current;
@@ -47,21 +48,11 @@ export function OnboardingProgressWrapper({ steps }: Props) {
     }
 
     async function finishOnboarding() {
-        //set hasOnboarded to true
+        trackerManager.track('onboarding_completed');
         useUserDataStore.getState().completeOnboarding();
-        const res = await presentPaywall()
-
-        switch (res) {
-            case 'PURCHASED':
-            case 'RESTORED':
-                router.replace('/home');
-                break;
-            case 'NOT_PRESENTED':
-            case 'ERROR':
-            case 'CANCELLED':
-                //show snackbar
-                break;
-        }
+        await openWithPlacement('onboarding_completed', () => {
+            router.replace('/home');
+        })
     }
 
     function advance() {
@@ -92,6 +83,7 @@ export function OnboardingProgressWrapper({ steps }: Props) {
 
     useEffect(() => {
         animateIn();
+        trackerManager.track('onboarding_step', { step: step.component.name });
     }, [currentIndex]);
 
     return (

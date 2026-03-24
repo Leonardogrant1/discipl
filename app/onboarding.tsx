@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import StoreReview from 'expo-store-review';
 import * as TrackingTransparency from 'expo-tracking-transparency';
+import { trackerManager } from '@/lib/tracking/tracker-manager';
 
 import { OnboardingProgressWrapper } from '@/components/onboarding/onboarding-progress-wrapper';
 import { ActivityStep } from '@/components/onboarding/steps/activity-step';
@@ -45,7 +46,10 @@ export default function OnboardingScreen() {
       component: TrackingStep,
       continueButtonText: 'Continue',
       preContinue: async () => {
-        await TrackingTransparency.requestTrackingPermissionsAsync();
+        const { status } = await TrackingTransparency.requestTrackingPermissionsAsync();
+        trackerManager.track('tracking_permission', {
+          status: status === 'granted' ? 'authorized' : 'declined',
+        });
       },
     },
     {

@@ -15,8 +15,9 @@ import { SettingsModal } from '@/components/settings-modal';
 import { SportsModal } from '@/components/sports-modal';
 import { Fonts } from '@/constants/theme';
 import { buildFeed, Category, FeedQuote } from '@/data/quotes';
-import { posthog } from '@/services/posthog';
-import { useRevenueCat } from '@/services/revenuecat/providers/RevenueCatProvider';
+import { trackerManager } from '@/lib/tracking/tracker-manager';
+import { useRevenueCat } from '@/services/purchases/revenuecat/providers/RevenueCatProvider';
+import { useSuperwallFunctions } from '@/services/purchases/superwall/useSuperwall';
 import { syncWidgetData } from '@/services/widgets/storage';
 import { useUserDataStore } from '@/stores/UserDataStore';
 import { devLog } from '@/utils/dev-log';
@@ -35,16 +36,17 @@ export default function HomeScreen() {
     const likedQuoteIds = useUserDataStore((s) => s.likedQuoteIds);
     const toggleLikedQuote = useUserDataStore((s) => s.toggleLikedQuote);
     const checkAndUpdateStreak = useUserDataStore((s) => s.checkAndUpdateStreak);
-    const { getUserEntitlements, presentPaywall } = useRevenueCat();
+    const { getUserEntitlements } = useRevenueCat();
+    const { openWithPlacement } = useSuperwallFunctions();
     const settings = useUserDataStore((s) => s.settings);
 
 
     useEffect(() => {
         async function checkEntitlements() {
             const entitlements = await getUserEntitlements();
-            if (!entitlements.active['Discipl Premium']) {
+            if (!entitlements.active['premium']) {
                 await Notifications.cancelAllScheduledNotificationsAsync();
-                await presentPaywall();
+                await openWithPlacement("home_screen");
             }
         }
         checkEntitlements();
@@ -52,6 +54,8 @@ export default function HomeScreen() {
 
     useEffect(() => {
         checkAndUpdateStreak();
+        const { currentStreak, longestStreak } = useUserDataStore.getState().streak;
+        trackerManager.track('streak_updated', { currentStreak, longestStreak });
     }, []);
 
     const feed = useMemo(() => buildFeed(selectedCategories), [selectedCategories]);
@@ -79,6 +83,7 @@ export default function HomeScreen() {
 
     function shareQuote(quote: FeedQuote) {
         const author = quote.author ? `\n— ${quote.author}` : '';
+        trackerManager.track('quote_shared', { quoteId: quote.id, category: quote.category });
         Share.share({
             message: `"${quote.text}"${author}\n\n📲 Discipl – Daily quotes & affirmations for athletes\nhttps://apps.apple.com/app/discipl`,
         });
@@ -92,7 +97,7 @@ export default function HomeScreen() {
 
     useEffect(() => {
         if (likedQuoteIds.length === 5) {
-            posthog.capture('five_likes_reached');
+            trackerManager.track('five_likes_reached');
             Animated.sequence([
                 Animated.spring(heartsScale, { toValue: 1.3, useNativeDriver: true }),
                 Animated.spring(heartsScale, { toValue: 1, useNativeDriver: true }),
@@ -203,7 +208,12 @@ export default function HomeScreen() {
                             <ShareIcon width={26} height={26} color="white" />
                         </View>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton} onPress={() => currentQuote && toggleLikedQuote(currentQuote.id)}>
+                    <TouchableOpacity style={styles.actionButton} onPress={() => {
+                        if (!currentQuote) return;
+                        const isLiked = likedQuoteIds.includes(currentQuote.id);
+                        trackerManager.track(isLiked ? 'quote_unliked' : 'quote_liked', { quoteId: currentQuote.id, category: currentQuote.category });
+                        toggleLikedQuote(currentQuote.id);
+                    }}>
                         <View style={[styles.iconButton, { backgroundColor: currentQuote && likedQuoteIds.includes(currentQuote.id) ? '#f92f2c57' : 'rgba(20,20,20,0.85)' }]}>
                             <HeartIcon width={26} height={26} color="white" />
                         </View>

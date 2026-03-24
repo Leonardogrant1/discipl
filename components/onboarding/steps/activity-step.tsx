@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { trackerManager } from '@/lib/tracking/tracker-manager';
 import { useOnboardingControl } from '../onboarding-control-context';
 import { SurveyQuestion } from '../survey-question';
 
@@ -24,6 +25,7 @@ export function ActivityStep() {
             onChange={(v) => {
                 setValue(v);
                 setCanContinue(true);
+                trackerManager.track('onboarding_experience_level', { level: v });
             }}
         />
     );

@@ -16,7 +16,7 @@ export function initPosthog(options?: { trackingAllowed?: boolean }) {
     }
 
     // Initialize PostHog with tracking configuration
-    posthogInstance = new PostHog(process.env.EXPO_PUBLIC_POSTHOG_EU_API_KEY, {
+    posthogInstance = new PostHog(process.env.EXPO_PUBLIC_POSTHOG_EU_API_KEY!, {
         host: process.env.EXPO_PUBLIC_POSTHOG_URL,
         enableSessionReplay: options?.trackingAllowed !== false,
         sessionReplayConfig: {

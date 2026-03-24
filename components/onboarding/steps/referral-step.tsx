@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { trackerManager } from '@/lib/tracking/tracker-manager';
 import { useOnboardingControl } from '../onboarding-control-context';
 import { SurveyQuestion } from '../survey-question';
 
@@ -18,6 +19,7 @@ export function ReferralStep() {
             onChange={(v) => {
                 setValue(v);
                 setCanContinue(true);
+                trackerManager.track('onboarding_referral_source', { source: v });
             }}
         />
     );

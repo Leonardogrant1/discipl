@@ -1,6 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 
+import { trackerManager } from '@/lib/tracking/tracker-manager';
 import { checkAndReschedule, scheduleNotifications } from '@/services/notifications';
 import { useUserDataStore } from '@/stores/UserDataStore';
 import { devLog } from '@/utils/dev-log';
@@ -58,7 +59,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
 
     const registerPushNotificationsAndSaveToken = async () => {
-        const { pushTokenString } = await registerPushNotifications();
+        const { status, pushTokenString } = await registerPushNotifications();
+        trackerManager.track('notifications_permission', {
+            status: status === 'granted' ? 'authorized' : 'declined',
+        });
         setExpoPushToken(pushTokenString);
     }
 

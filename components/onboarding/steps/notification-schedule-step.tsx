@@ -1,21 +1,14 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useState } from 'react';
 import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-import { useUserDataStore } from '@/stores/UserDataStore';
 import LottieView from 'lottie-react-native';
+
+import { formatHour } from '@/components/modals/notification-settings-modal';
+import { useUserDataStore } from '@/stores/UserDataStore';
 
 const MIN = 1;
 const MAX = 10;
-
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
-
-function formatHour(hour: number): string {
-    if (hour === 0) return '12:00 AM';
-    if (hour < 12) return `${hour}:00 AM`;
-    if (hour === 12) return '12:00 PM';
-    return `${hour - 12}:00 PM`;
-}
 
 type HourPickerModalProps = {
     visible: boolean;
@@ -91,11 +84,10 @@ export function NotificationScheduleStep() {
                 source={require('@/assets/animations/notifications.json')}
                 autoPlay
                 loop={false}
-                style={{ width: "100%", height: 200 }}
+                style={{ width: '100%', height: 200 }}
             />
 
             <View style={styles.card}>
-                {/* How many */}
                 <View style={styles.row}>
                     <Text style={styles.rowLabel}>How many</Text>
                     <View style={styles.counter}>
@@ -111,7 +103,6 @@ export function NotificationScheduleStep() {
 
                 <View style={styles.divider} />
 
-                {/* Start at */}
                 <TouchableOpacity style={styles.row} onPress={() => setPicker('start')}>
                     <Text style={styles.rowLabel}>Start at</Text>
                     <View style={styles.timeChip}>
@@ -121,7 +112,6 @@ export function NotificationScheduleStep() {
 
                 <View style={styles.divider} />
 
-                {/* End at */}
                 <TouchableOpacity style={styles.row} onPress={() => setPicker('end')}>
                     <Text style={styles.rowLabel}>End at</Text>
                     <View style={styles.timeChip}>
@@ -234,7 +224,6 @@ const styles = StyleSheet.create({
         lineHeight: 20,
         fontStyle: 'italic',
     },
-    // Sheet modal
     backdrop: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.5)',

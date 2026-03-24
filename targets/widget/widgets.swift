@@ -26,11 +26,6 @@ struct Provider: TimelineProvider {
         let startHour = sharedDefaults?.object(forKey: "startHour") as? Int ?? 8
         let endHour = sharedDefaults?.object(forKey: "endHour") as? Int ?? 20
         let notificationsPerDay = sharedDefaults?.object(forKey: "notificationsPerDay") as? Int ?? 5
-        print("quotesJsonString: \(quotesJsonString)")
-        print("sportsJsonString: \(sportsJsonString)")
-        print("startHour: \(startHour)")
-        print("endHour: \(endHour)")
-        print("notificationsPerDay: \(notificationsPerDay)")
 
         var quotes: [QuoteData] = []
         if let data = quotesJsonString.data(using: .utf8) {

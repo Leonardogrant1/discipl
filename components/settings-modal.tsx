@@ -1,14 +1,19 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
+import { useState } from 'react';
+import { Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import FireIcon from '@/assets/icons/fire.svg';
+import { EditFieldModal } from '@/components/modals/edit-field-modal';
+import { NotificationSettingsModal } from '@/components/modals/notification-settings-modal';
 import { useUserDataStore } from '@/stores/UserDataStore';
 
+const AGE_OPTIONS = ['18–24', '25–34', '35–44', '45–54', '55+'];
 const DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'So'];
 
-// Returns ISO date strings for Mon–Sun of the current week
 function getCurrentWeekDates(): string[] {
   const today = new Date();
-  const dow = today.getDay(); // 0 = Sun
+  const dow = today.getDay();
   const monday = new Date(today);
   monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
   return Array.from({ length: 7 }, (_, i) => {
@@ -18,20 +23,12 @@ function getCurrentWeekDates(): string[] {
   });
 }
 
-const SETTINGS_ROWS = [
-  { label: 'Name', value: 'Leonardo' },
-  { label: 'Gender', value: 'Male' },
-  { label: 'Notifications' },
-  { label: 'Widget' },
-  { label: 'Manage subscriptions' },
-  { label: 'Feature Request' },
-  { label: 'Bug Report' },
+const LEGAL_ROWS = [
+  { label: 'Terms of Use', url: 'https://northbyte.studio/terms-of-service/discipl' },
+  { label: 'Privacy Policy', url: 'https://northbyte.studio/privacy-policy/discipl' },
 ];
 
-const LEGAL_ROWS = [
-  { label: 'Terms of Use' },
-  { label: 'Privacy Policy' },
-];
+type EditField = 'name' | 'age' | null;
 
 type Props = {
   visible: boolean;
@@ -40,7 +37,21 @@ type Props = {
 
 export function SettingsModal({ visible, onClose }: Props) {
   const streak = useUserDataStore((s) => s.streak);
+  const settings = useUserDataStore((s) => s.settings);
+  const updateSettings = useUserDataStore((s) => s.updateSettings);
   const weekDates = getCurrentWeekDates();
+  const [editField, setEditField] = useState<EditField>(null);
+  const [notificationsVisible, setNotificationsVisible] = useState(false);
+
+  const settingsRows = [
+    { label: 'Name', value: settings.name || '—', field: 'name' as EditField, onPress: undefined },
+    { label: 'Age', value: settings.age || '—', field: 'age' as EditField, onPress: undefined },
+    { label: 'Notifications', value: undefined, field: null, onPress: () => setNotificationsVisible(true) },
+    // { label: 'Widget', value: undefined, field: null, onPress: undefined },
+    { label: 'Manage Subscriptions', value: undefined, field: null, onPress: () => Linking.openURL('https://apps.apple.com/account/subscriptions') },
+    { label: 'Feature Request', value: undefined, field: null, onPress: () => WebBrowser.openBrowserAsync('https://northbyte.studio/features/discipl') },
+    { label: 'Bug Report', value: undefined, field: null, onPress: () => WebBrowser.openBrowserAsync('https://northbyte.studio/bugs/discipl') },
+  ];
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -52,7 +63,10 @@ export function SettingsModal({ visible, onClose }: Props) {
 
           <Text style={styles.appTitle}>Discipl</Text>
 
-          <Text style={styles.sectionLabel}>Your streak 🔥</Text>
+          <View style={styles.streakLabel}>
+            <Text style={styles.sectionLabel}>Your streak</Text>
+            <FireIcon style={{ marginBottom: 5 }} width={22} height={22} />
+          </View>
           <View style={styles.streakCard}>
             <View style={styles.streakLeft}>
               <Text style={styles.streakCount}>{streak.currentStreak}</Text>
@@ -82,14 +96,17 @@ export function SettingsModal({ visible, onClose }: Props) {
 
           <Text style={styles.sectionLabel}>Settings</Text>
           <View style={styles.rowGroup}>
-            {SETTINGS_ROWS.map((row, i) => (
+            {settingsRows.map((row, i) => (
               <TouchableOpacity
                 key={row.label}
-                style={[styles.row, i < SETTINGS_ROWS.length - 1 && styles.rowBorder]}
+                style={[styles.row, i < settingsRows.length - 1 && styles.rowBorder]}
+                onPress={() => row.onPress ? row.onPress() : row.field && setEditField(row.field)}
               >
                 <Text style={styles.rowLabel}>{row.label}</Text>
                 <View style={styles.rowRight}>
-                  {row.value && <Text style={styles.rowValue}>{row.value}</Text>}
+                  {row.value !== undefined && (
+                    <Text style={styles.rowValue}>{row.value}</Text>
+                  )}
                   <MaterialIcons name="chevron-right" size={20} color="rgba(255,255,255,0.4)" />
                 </View>
               </TouchableOpacity>
@@ -102,6 +119,7 @@ export function SettingsModal({ visible, onClose }: Props) {
               <TouchableOpacity
                 key={row.label}
                 style={[styles.row, i < LEGAL_ROWS.length - 1 && styles.rowBorder]}
+                onPress={() => WebBrowser.openBrowserAsync(row.url)}
               >
                 <Text style={styles.rowLabel}>{row.label}</Text>
                 <MaterialIcons name="chevron-right" size={20} color="rgba(255,255,255,0.4)" />
@@ -110,6 +128,31 @@ export function SettingsModal({ visible, onClose }: Props) {
           </View>
         </ScrollView>
       </View>
+
+      <NotificationSettingsModal
+        visible={notificationsVisible}
+        onClose={() => setNotificationsVisible(false)}
+      />
+
+      <EditFieldModal
+        visible={editField === 'name'}
+        title="Name"
+        type="text"
+        placeholder="Your name"
+        value={settings.name}
+        onSave={(v) => updateSettings({ name: v })}
+        onClose={() => setEditField(null)}
+      />
+
+      <EditFieldModal
+        visible={editField === 'age'}
+        title="Age"
+        type="options"
+        options={AGE_OPTIONS}
+        value={settings.age}
+        onSave={(v) => updateSettings({ age: v })}
+        onClose={() => setEditField(null)}
+      />
     </Modal>
   );
 }
@@ -140,6 +183,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 12,
     marginTop: 8,
+  },
+  streakLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   streakCard: {
     flexDirection: 'row',

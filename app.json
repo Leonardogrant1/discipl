@@ -46,7 +46,8 @@
       "expo-video",
       "expo-tracking-transparency",
       "expo-notifications",
-      "@bacons/apple-targets"
+      "@bacons/apple-targets",
+      "react-native-appsflyer"
     ],
     "experiments": {
       "typedRoutes": true,
