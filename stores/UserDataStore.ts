@@ -34,6 +34,7 @@ type StreakData = {
 
 const initialState = {
     hasCompletedOnboarding: false,
+    hasSeenTutorial: false,
     likedQuoteIds: [],
     settings: defaultUserSettings,
     streak: defaultStreakData,
@@ -42,6 +43,7 @@ const initialState = {
 
 export type UserDataState = {
     hasCompletedOnboarding: boolean
+    hasSeenTutorial: boolean
     likedQuoteIds: string[]
 
     settings: UserDataSettings
@@ -49,6 +51,7 @@ export type UserDataState = {
 
     checkAndUpdateStreak: () => void
     completeOnboarding: () => void
+    completeTutorial: () => void
     toggleLikedQuote: (id: string) => void
     updateSettings: (settings: Partial<UserDataSettings>) => void
 }
@@ -75,6 +78,7 @@ export const useUserDataStore = create<UserDataState>()(
         (set) => ({
             ...initialState,
             completeOnboarding: () => set({ hasCompletedOnboarding: true }),
+            completeTutorial: () => set({ hasSeenTutorial: true }),
             toggleLikedQuote: (id: string) => set((state) => ({
                 likedQuoteIds: state.likedQuoteIds.includes(id)
                     ? state.likedQuoteIds.filter((likedId) => likedId !== id)

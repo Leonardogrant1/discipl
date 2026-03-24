@@ -245,6 +245,15 @@ export default function HomeScreen() {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.debugButton}
+                        onPress={() => {
+                            useUserDataStore.setState({ hasSeenTutorial: false });
+                            router.replace('/tutorial');
+                        }}
+                    >
+                        <Text style={styles.debugButtonText}>🎓 Tutorial</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.debugButton}
                         onPress={async () => {
                             const scheduleId = await Notifications.scheduleNotificationAsync({
                                 content: {
