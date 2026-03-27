@@ -61,5 +61,27 @@
     {
         "id": "str_015",
         "text": "Iron sharpens iron."
+    },
+    {
+        "id": "str_016",
+        "text": "The cave you fear to enter holds the treasure you seek.",
+        "author": "Joseph Campbell"
+    },
+    {
+        "id": "str_017",
+        "text": "Strength is built in the moments you want to quit but don't."
+    },
+    {
+        "id": "str_018",
+        "text": "Be the kind of person that makes others raise their standards."
+    },
+    {
+        "id": "str_019",
+        "text": "Tough times never last. Tough people do.",
+        "author": "Robert H. Schuller"
+    },
+    {
+        "id": "str_020",
+        "text": "You are harder than you think. Prove it."
     }
 ]

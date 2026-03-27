@@ -64,5 +64,26 @@
         "id": "disc_015",
         "text": "Endure. Then prevail.",
         "author": "Marcus Aurelius"
+    },
+    {
+        "id": "disc_016",
+        "text": "Discipline is not punishment. It is the highest form of self-respect."
+    },
+    {
+        "id": "disc_017",
+        "text": "Your habits will either make you or break you. Choose wisely."
+    },
+    {
+        "id": "disc_018",
+        "text": "The amateur waits for inspiration. The professional shows up and gets to work.",
+        "author": "Steven Pressfield"
+    },
+    {
+        "id": "disc_019",
+        "text": "No shortcuts. No excuses. No days off from who you are becoming."
+    },
+    {
+        "id": "disc_020",
+        "text": "An hour of pain in the gym is better than a lifetime of pain on the couch."
     }
 ]

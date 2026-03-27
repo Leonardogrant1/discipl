@@ -1,6 +1,9 @@
+import affirmations from './affirmations.json'
 import confidence from './confidence.json'
 import discipline from './discipline.json'
+import focus from './focus.json'
 import mindset from './mindset.json'
+import purpose from './purpose.json'
 import resilience from './resilience.json'
 import strength from './strength.json'
 
@@ -10,6 +13,9 @@ export const quotesByCategory = {
     strength,
     confidence,
     resilience,
+    affirmations,
+    focus,
+    purpose,
 } as const
 
 export type Category = keyof typeof quotesByCategory
@@ -20,6 +26,9 @@ export const ALL_CATEGORIES: Category[] = [
     'strength',
     'confidence',
     'resilience',
+    'affirmations',
+    'focus',
+    'purpose',
 ]
 
 export type Quote = {

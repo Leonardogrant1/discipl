@@ -1,7 +1,7 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { ALL_CATEGORIES, Category, quotesByCategory } from '@/data/quotes';
+import { ALL_CATEGORIES, Category } from '@/data/quotes';
 import { trackerManager } from '@/lib/tracking/tracker-manager';
 import { useUserDataStore } from '@/stores/UserDataStore';
 
@@ -11,6 +11,20 @@ const CATEGORY_LABELS: Record<Category, string> = {
   strength: 'Mental Strength',
   confidence: 'Confidence',
   resilience: 'Resilience',
+  affirmations: 'Affirmations',
+  focus: 'Focus',
+  purpose: 'Purpose',
+};
+
+const CATEGORY_SUBTEXTS: Record<Category, string> = {
+  discipline: 'Stay focused & consistent',
+  mindset: 'Think like a champion',
+  strength: 'Push through any obstacle',
+  confidence: 'Believe in yourself',
+  resilience: 'Bounce back stronger',
+  affirmations: 'Speak your power into existence',
+  focus: 'Eliminate noise, execute deep',
+  purpose: 'Know your why, own your path',
 };
 
 type Props = {
@@ -19,14 +33,13 @@ type Props = {
 };
 
 function CategoryCard({ category, selected }: { category: Category; selected: boolean }) {
-  const count = quotesByCategory[category].length;
   return (
     <View style={[styles.card, selected && styles.cardSelected]}>
       {selected && (
         <MaterialIcons name="check-circle-outline" size={20} color="white" style={styles.cardCheck} />
       )}
       <Text style={styles.cardName}>{CATEGORY_LABELS[category]}</Text>
-      <Text style={styles.cardCount}>{count} Quotes</Text>
+      <Text style={styles.cardSubtext}>{CATEGORY_SUBTEXTS[category]}</Text>
     </View>
   );
 }
@@ -142,8 +155,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 4,
   },
-  cardCount: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 12,
+  cardSubtext: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 11,
   },
 });
